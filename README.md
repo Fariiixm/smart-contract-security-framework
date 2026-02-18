@@ -19,7 +19,7 @@ This framework demonstrates security testing methodology for Ethereum smart cont
 
 1. Clone the repository:
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/Fariiixm/smart-contract-security-framework.git
    cd smart-contract-security-framework
    ```
 
