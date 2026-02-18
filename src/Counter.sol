@@ -31,10 +31,7 @@ contract Counter {
         uint16 e,
         uint16 f,
         uint16 g,
-        uint16 h,
-        uint16 i,
-        uint16 j,
-        uint16 k
+        uint16 h
     ) public {
         // Esta función está vacía para medir solo el coste de enviar los datos (calldata)
     }
