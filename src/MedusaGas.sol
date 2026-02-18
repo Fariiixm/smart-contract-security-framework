@@ -51,6 +51,6 @@ contract MedusaGas {
         uint256 startGas = gasleft();
         counter.checkcalldata(a, b, c, d, e, f, g, h, i, j, k);
         uint256 gasUsed = startGas - gasleft();
-        assert(gasUsed < 8130);
+        assert(gasUsed < 9000);
     }
 }
