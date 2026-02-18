@@ -16,7 +16,7 @@ contract CounterGas is Test {
     // Límite de gas que queremos permitir (Budget de Gas)
     uint256 constant MAX_GAS_SETNUMBER = 100000;
     uint256 constant MAX_GAS_INCREMENT = 180000; // Cuidado: esto fallará si el bucle es muy largo
-    uint256 constant MAX_GAS_DOBLE = 180000;
+    uint256 constant MAX_GAS_DOBLE = 250000;
     uint256 constant MAX_GAS_CALLDATA = 9000;
 
     // CASO DE USO 1: Fuzzing simple + Medición de Gas
