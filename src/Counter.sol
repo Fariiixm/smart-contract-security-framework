@@ -10,20 +10,32 @@ contract Counter {
     }
 
     function increment(uint8 times) public {
-        for(uint8 i = 0; i < times; i++){
+        for (uint8 i = 0; i < times; i++) {
             number++;
         }
     }
 
     function doble(uint8 a, uint8 b) public {
-        for(uint8 i = 0; i < a; i++){
-            for(uint8 j = 0; j < b; j++){
+        for (uint8 i = 0; i < a; i++) {
+            for (uint8 j = 0; j < b; j++) {
                 number++;
             }
         }
     }
 
-    function checkcalldata(uint16 a, uint16 b, uint16 c, uint16 d, uint16 e, uint16 f, uint16 g, uint16 h, uint16 i, uint16 j, uint16 k) public {
+    function checkcalldata(
+        uint16 a,
+        uint16 b,
+        uint16 c,
+        uint16 d,
+        uint16 e,
+        uint16 f,
+        uint16 g,
+        uint16 h,
+        uint16 i,
+        uint16 j,
+        uint16 k
+    ) public {
         // Esta función está vacía para medir solo el coste de enviar los datos (calldata)
     }
 }

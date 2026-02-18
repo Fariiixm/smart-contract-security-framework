@@ -1,6 +1,6 @@
-# Smart Contract Security Testing
+# Smart Contract Security Framework
 
-This project demonstrates security testing methodology for Ethereum smart contracts using **Foundry** (unit testing) and **Medusa** (fuzzing).
+This framework demonstrates security testing methodology for Ethereum smart contracts using **Foundry** (unit testing) and **Medusa** (fuzzing).
 
 ## Features
 - **Calldata Gas Optimization**: Analysis of gas costs for zero vs non-zero bytes.
@@ -20,7 +20,7 @@ This project demonstrates security testing methodology for Ethereum smart contra
 1. Clone the repository:
    ```bash
    git clone <your-repo-url>
-   cd tt
+   cd smart-contract-security-framework
    ```
 
 2. Install dependencies:

@@ -35,7 +35,19 @@ contract MedusaGas {
     }
 
     // Calldata Cost
-    function test_Calldata(uint16 a, uint16 b, uint16 c, uint16 d, uint16 e, uint16 f, uint16 g, uint16 h, uint16 i, uint16 j, uint16 k) public {
+    function test_Calldata(
+        uint16 a,
+        uint16 b,
+        uint16 c,
+        uint16 d,
+        uint16 e,
+        uint16 f,
+        uint16 g,
+        uint16 h,
+        uint16 i,
+        uint16 j,
+        uint16 k
+    ) public {
         uint256 startGas = gasleft();
         counter.checkcalldata(a, b, c, d, e, f, g, h, i, j, k);
         uint256 gasUsed = startGas - gasleft();
