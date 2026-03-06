@@ -3,36 +3,33 @@
 pragma solidity 0.8.13;
 
 contract Counter {
-    uint8 public number;
+    uint16 public number;
 
-    function setNumber(uint8 newNumber) public {
+    function setNumber(uint16 newNumber) public {
         number = newNumber;
     }
 
-    function increment(uint8 times) public {
-        for (uint8 i = 0; i < times; i++) {
+    function increment(uint16 times) public {
+        require(number + times <= type(uint16).max, "Overflow");
+
+        for (uint16 i = 0; i < times; i++) {
             number++;
         }
     }
 
-    function doble(uint8 a, uint8 b) public {
-        for (uint8 i = 0; i < a; i++) {
-            for (uint8 j = 0; j < b; j++) {
+    function doble(uint16 a, uint16 b) public {
+        uint256 total = uint256(a) * uint256(b);
+        require(total <= type(uint16).max, "Overflow");
+        require(number + total <= type(uint16).max, "Overflow");
+
+        for (uint16 i = 0; i < a; i++) {
+            for (uint16 j = 0; j < b; j++) {
                 number++;
             }
         }
     }
 
-    function checkcalldata(
-        uint16 a,
-        uint16 b,
-        uint16 c,
-        uint16 d,
-        uint16 e,
-        uint16 f,
-        uint16 g,
-        uint16 h
-    ) public {
+    function checkcalldata(uint256 a) public {
         // Esta función está vacía para medir solo el coste de enviar los datos (calldata)
     }
 }

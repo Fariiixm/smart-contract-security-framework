@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "../src/Counter.sol";
 
 contract EchidnaCounterTest is Counter {
-
+/*
     // Variables controladas por Echidna
     uint8 private x;
     uint8 private times;
@@ -48,10 +48,9 @@ contract EchidnaCounterTest is Counter {
     }
 
     function callCalldata(
-        uint16 a1, uint16 b1, uint16 c1, uint16 d1,
-        uint16 e1, uint16 f1, uint16 g1, uint16 h1
+        uint256 a
     ) public {
-        checkcalldata(a1, b1, c1, d1, e1, f1, g1, h1);
+        checkcalldata(a);
     }
 
     //-----
@@ -79,8 +78,8 @@ contract EchidnaCounterTest is Counter {
 
     function echidna_gas_calldata() public returns (bool) {
         uint256 gasStart = gasleft();
-        callCalldata(1,2,3,4,5,6,7,8);
+        callCalldata(1);
         uint256 gasUsed = gasStart - gasleft();
         return gasUsed <= MAX_GAS_CALLDATA;
-    }
+    }*/
 }

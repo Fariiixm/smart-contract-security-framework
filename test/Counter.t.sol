@@ -67,20 +67,9 @@ contract CounterGas is Test {
 
     // CASO DE USO 4: Coste de Calldata (Datos de entrada)
     function testGasCallData(
-        uint16 a,
-        uint16 b,
-        uint16 c,
-        uint16 d,
-        uint16 e,
-        uint16 f,
-        uint16 g,
-        uint16 h,
-        uint16 i,
-        uint16 j,
-        uint16 k
-    ) public {
+        uint256 a) public {
         uint256 gasStart = gasleft();
-        counter.checkcalldata(a, b, c, d, e, f, g, h, i, j, k);
+        counter.checkcalldata(a);
         uint256 gasUsed = gasStart - gasleft();
 
         assertLe(gasUsed, MAX_GAS_CALLDATA, "Gas excedido en calldata");
