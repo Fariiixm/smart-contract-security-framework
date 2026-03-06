@@ -13,6 +13,7 @@ This framework demonstrates security testing methodology for Ethereum smart cont
 ## Requirements
 - [Foundry](https://getfoundry.sh/)
 - [Medusa](https://github.com/crytic/medusa)
+- [Echidna](https://github.com/crytic/echidna)
 - Python 3.8+ (for scripts)
 
 ## Installation
@@ -57,6 +58,13 @@ python tests/measure_calldata_gas.py
 To detect the reentrancy vulnerability:
 ```bash
 medusa --config medusa_reentrancy.json fuzz
+```
+
+### Run Fuzzing (Echidna)
+To verify the reentrancy vulnerability using Echidna:
+```bash
+# Ensure crytic-compile is installed: pip install crytic-compile
+echidna . --contract ReentrancyMedusa --config echidna_config.yaml
 ```
 
 ## Reports

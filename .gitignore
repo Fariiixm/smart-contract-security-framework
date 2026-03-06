@@ -23,3 +23,9 @@ __pycache__/
 crytic-export/
 slither_results.json
 .medusa/
+.medusa-config.json
+
+# Echidna
+echidna-*.tar.gz
+corpus-echidna/
+covered.*

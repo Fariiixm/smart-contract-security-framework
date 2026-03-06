@@ -1,0 +1,3 @@
+prefix: "property_"
+testMode: "property"
+corpusDir: "corpus-echidna"
