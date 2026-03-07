@@ -10,7 +10,7 @@ contract Counter {
     }
 
     function increment(uint16 times) public {
-        require(number + times <= type(uint16).max, "Overflow");
+        require(uint256(number) + uint256(times) <= type(uint16).max, "Overflow");
 
         for (uint16 i = 0; i < times; i++) {
             number++;
