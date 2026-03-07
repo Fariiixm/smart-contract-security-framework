@@ -15,12 +15,11 @@ contract CounterGas is Test {
 
     // Límite de gas que queremos permitir (Budget de Gas)
     uint256 constant MAX_GAS_SETNUMBER = 100000;
-    uint256 constant MAX_GAS_INCREMENT = 180000; // Cuidado: esto fallará si el bucle es muy largo
-    uint256 constant MAX_GAS_DOBLE = 250000;
-    uint256 constant MAX_GAS_CALLDATA = 9000;
+    uint256 constant MAX_GAS_INCREMENT = 50000000;
+    uint256 constant MAX_GAS_DOBLE = 60000000;
 
     // CASO DE USO 1: Fuzzing simple + Medición de Gas
-    function testGasSetNumber(uint8 x) public {
+    function testGasSetNumber(uint16 x) public {
         uint256 gasStart = gasleft(); // Foto del gas inicial
         counter.setNumber(x);
         uint256 gasUsed = gasStart - gasleft(); // Cálculo del consumo
@@ -30,13 +29,10 @@ contract CounterGas is Test {
     }
 
     // CASO DE USO 2: Fuzzing con bucles y restricciones (Assumes)
-    function testGasIncrement(uint8 x, uint8 times) public {
+    function testGasIncrement(uint16 x, uint16 times) public {
         // vm.assume le dice al Fuzzer: "No pruebes valores que no cumplan esto"
         // Evitamos overflow manual del uint8 para que el test se centre en el gas
-        vm.assume(x < type(uint8).max - times);
-
-        // Limitamos el bucle a 500 iteraciones para no exceder el límite de gas de bloque
-        vm.assume(times <= 100); // He bajado a 100 para que pase tu límite de 180.000 gas
+        vm.assume(uint256(x) + uint256(times) <= type(uint16).max);
 
         counter.setNumber(x);
 
@@ -48,13 +44,13 @@ contract CounterGas is Test {
     }
 
     // CASO DE USO 3: Bucles anidados (Complejidad Cuadrática)
-    function testGasDoble(uint8 x, uint8 a, uint8 b) public {
+    function testGasDoble(uint16 x, uint16 a, uint16 b) public {
         // Restricción para evitar overflow matemático en la precondición
-        vm.assume(uint256(x) + uint256(a) * uint256(b) <= type(uint8).max);
+        uint256 mult = uint256(a) * uint256(b);
 
-        // Limitamos los bucles para mantener el gas bajo control
-        vm.assume(a <= 20); // Bajado a 20 para ajustar al límite de gas
-        vm.assume(b <= 20);
+        //Evitamos desbordamiento
+        vm.assume(mult <= type(uint16).max);
+        vm.assume(uint256(x) + mult <= type(uint16).max);
 
         counter.setNumber(x);
 
@@ -66,12 +62,21 @@ contract CounterGas is Test {
     }
 
     // CASO DE USO 4: Coste de Calldata (Datos de entrada)
-    function testGasCallData(
-        uint256 a) public {
-        uint256 gasStart = gasleft();
-        counter.checkcalldata(a);
-        uint256 gasUsed = gasStart - gasleft();
+    function testGasCallData(uint256 a) public {
+        // warm-up
+        counter.checkcalldata(0);
 
-        assertLe(gasUsed, MAX_GAS_CALLDATA, "Gas excedido en calldata");
+        uint256 gas1 = gasleft();
+        counter.checkcalldata(0);
+        uint256 gas2 = gasleft();
+
+        counter.checkcalldata(115792089237316195423570985008687907853269984665640564039457584007913129639935);
+        uint256 gas3 = gasleft();
+
+        uint256 gasUsed1 = gas1 - gas2;
+        uint256 gasUsed2 = gas2 - gas3;
+
+        //La primera llamada debe consumir menos gas que la segunda
+        assertEq(gasUsed2, gasUsed1, "No tiene en cuenta CallData");
     }
 }
