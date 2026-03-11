@@ -3,57 +3,42 @@ pragma solidity 0.8.13;
 
 import "./Reentrancy.sol";
 
-interface Vm {
-    function deal(address, uint256) external;
-    function prank(address) external;
-}
-
+// Un contrato de prueba "natural" para Medusa
+// No incluye lógica de ataque hardcodeada, deja que el fuzzer descubra asincronías.
 contract ReentrancyMedusa {
-    VulnerableBank bank;
+    VulnerableBank public bank;
 
-    // Cheatcode address for Foundry/Medusa
-    Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
-    // Track funds
-    uint256 public my_deposits;
-    uint256 public total_received;
+    uint256 public totalDeposits;
 
     constructor() {
         bank = new VulnerableBank();
-
-        // SIMULACIÓN DE VICTIMA:
-        // En lugar de simular un usuario completo con prank,
-        // simplemente inyectamos ETH "extra" al banco para que sea solvente.
-        vm.deal(address(bank), 100 ether);
     }
 
-    // Allow Medusa to deposit
+    // Envoltorio natural para simular depósitos generales
     function deposit() public payable {
         bank.deposit{value: msg.value}();
-        my_deposits += msg.value;
+        totalDeposits += msg.value;
     }
 
-    // Allow Medusa to withdraw
+    // Envoltorio natural para que la herramienta intente retirar
     function withdraw() public {
-        bank.withdraw();
-    }
-
-    // Property: We should never profit from the bank (receive more than we deposited)
-    function property_no_profit() public view returns (bool) {
-        return total_received <= my_deposits;
-    }
-
-    receive() external payable {
-        // Solo contamos dinero si viene del banco
-        if (msg.sender == address(bank)) {
-            total_received += msg.value;
-        }
-
-        // Attack Logic:
-        // Si recibimos fondos del banco, intentamos sacar MÁS.
-        // Limitamos el gas para evitar Out of Gas.
-        if (address(bank).balance >= 1 ether && gasleft() > 5000) {
+        // Obtenemos el balance antes para saber si debiera fallar o no
+        uint256 bal = bank.balances(address(this));
+        if (bal > 0) {
+            bank.withdraw();
+            // Actualizamos la contabilidad si fue exitoso (en un entorno sin vulnerabilidad)
+            totalDeposits -= bal;
+        } else {
+            // Intentar retirar sin balance, natural fuzzing
             try bank.withdraw() {} catch {}
         }
+    }
+
+    // PROPIEDAD NATURAL: El balance real del banco nunca debe ser menor
+    // a los depósitos registrados.
+    // Si Medusa (u otro fuzzer avanzado) implementa re-entradas estándar en sus callers,
+    // el banco enviará ETH y no restará el balance hasta el final, filtrando ETH real vs contable.
+    function property_solvency() public view returns (bool) {
+        return address(bank).balance >= totalDeposits;
     }
 }
