@@ -4,6 +4,45 @@ pragma solidity ^0.8.13;
 import "../src/Counter.sol";
 
 contract EchidnaCounterTest is Counter {
+    uint16 internal valueIncrement;
+    uint16 internal valueDoble;
+    uint16 public fuzzNumber;
+
+    function increment(uint16 times) public override {
+        //solo actualizamos si no hay overflow
+        if (uint256(number) + uint256(times) <= type(uint16).max) {
+            valueIncrement += times;
+            super.increment(times);
+        }
+    }
+
+    function doble(uint16 a, uint16 b) public override {
+        uint256 total = uint256(a) * uint256(b);
+        if (total + number <= type(uint16).max) {
+            valueDoble += uint16(total);
+            super.doble(a, b);
+        }
+    }
+
+    function echidna_no_overflow() public view returns (bool){
+        return number <= type(uint16).max;
+    }
+
+    function echidna_setNumber() public returns (bool){
+        setNumber(fuzzNumber);
+        // Reseteamos shadow para mantener consistencia
+        valueIncrement = fuzzNumber;
+        valueDoble = 0;
+        return number == fuzzNumber;
+    }
+
+    function echidna_increment() public returns (bool){
+        return number == valueIncrement + valueDoble;
+    }
+
+    function echidna_doble() public returns (bool){
+        return number == valueIncrement + valueDoble;
+    }
 /*
     // Variables controladas por Echidna
     uint8 private x;
