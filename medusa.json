@@ -29,7 +29,7 @@
 		],
 		"blockNumberDelayMax": 60480,
 		"blockTimestampDelayMax": 604800,
-		"transactionGasLimit": 12500000,
+		"transactionGasLimit": 65000000,
 		"testing": {
 			"stopOnFailedTest": true,
 			"stopOnFailedContractMatching": false,
