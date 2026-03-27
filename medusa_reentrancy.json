@@ -95,7 +95,7 @@
     },
     "slither": {
         "useSlither": true,
-        "cachePath": "slither_results.json",
+        "cachePath": "slither_results_reentrancy.json",
         "args": []
     },
     "logging": {

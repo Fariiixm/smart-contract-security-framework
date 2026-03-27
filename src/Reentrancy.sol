@@ -14,6 +14,8 @@ contract VulnerableBank {
         uint256 balance = balances[msg.sender];
         require(balance > 0, "Insufficient balance");
 
+        //balances[msg.sender] = 0;
+
         (bool success, ) = msg.sender.call{value: balance}("");
         require(success, "Transfer failed");
 
