@@ -14,7 +14,9 @@ contract VulnerableBank {
         uint256 balance = balances[msg.sender];
         require(balance > 0, "Insufficient balance");
 
-        (bool success,) = msg.sender.call{value: balance}("");
+        //balances[msg.sender] = 0;
+
+        (bool success, ) = msg.sender.call{value: balance}("");
         require(success, "Transfer failed");
 
         balances[msg.sender] = 0;
@@ -22,7 +24,7 @@ contract VulnerableBank {
 }
 
 // Attack Contract (for manual testing/PoC)
-contract Attack {
+/*contract Attack {
     VulnerableBank public bank;
 
     constructor(address _bank) {
@@ -42,3 +44,4 @@ contract Attack {
         bank.withdraw();
     }
 }
+*/

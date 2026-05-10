@@ -13,6 +13,7 @@ contract Counter {
         require(uint256(number) + uint256(times) <= type(uint16).max, "Overflow");
 
         for (uint16 i = 0; i < times; i++) {
+            if (number % 7 == 0 && number != 0) number++; //NO OK
             number++;
         }
     }

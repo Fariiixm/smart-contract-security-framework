@@ -3,7 +3,7 @@
 		"workers": 10,
 		"workerResetLimit": 50,
 		"timeout": 0,
-		"testLimit": 0,
+		"testLimit": 7900,
 		"shrinkLimit": 5000,
 		"callSequenceLength": 100,
 		"pruneFrequency": 5,
@@ -29,7 +29,7 @@
 		],
 		"blockNumberDelayMax": 60480,
 		"blockTimestampDelayMax": 604800,
-		"transactionGasLimit": 12500000,
+		"transactionGasLimit": 65000000,
 		"testing": {
 			"stopOnFailedTest": true,
 			"stopOnFailedContractMatching": false,

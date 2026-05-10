@@ -3,8 +3,8 @@
         "workers": 10,
         "workerResetLimit": 50,
         "timeout": 0,
-        "testLimit": 0,
-        "shrinkLimit": 5000,
+        "testLimit": 50000,
+        "shrinkLimit": 0,
         "callSequenceLength": 100,
         "pruneFrequency": 5,
         "corpusDirectory": "",
@@ -16,7 +16,7 @@
         "coverageExclusions": [],
         "revertReporterEnabled": false,
         "targetContracts": [
-            "ReentrancyMedusa"
+            "MedusaFunctional"
         ],
         "predeployedContracts": {},
         "targetContractsBalances": [],
@@ -29,7 +29,7 @@
         ],
         "blockNumberDelayMax": 60480,
         "blockTimestampDelayMax": 604800,
-        "transactionGasLimit": 12500000,
+        "transactionGasLimit": 60000000,
         "testing": {
             "stopOnFailedTest": true,
             "stopOnFailedContractMatching": false,
@@ -95,7 +95,7 @@
     },
     "slither": {
         "useSlither": true,
-        "cachePath": "slither_results_reentrancy.json",
+        "cachePath": "slither_results.json",
         "args": []
     },
     "logging": {

